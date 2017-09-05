@@ -34,7 +34,8 @@ Ext.define('PrintIt', {
         
 	    var newContext = Ext.create(Rally.app.Context, {
     	    initialValues: {
-        	    project: this._getProjectFilter()
+        	    project: this._getProjectFilter(),
+                projectScopeDown: true
         	}
     	});
 
