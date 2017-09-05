@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>AC Demo</title>
+	<script type="text/javascript" src="https://eu1.rallydev.com/apps/2.0/sdk-debug.js"></script>
+
+    <script type="text/javascript">
+
+Ext.define('PrintIt', {
+        extend: 'Rally.app.TimeboxScopedApp',
+        alias: 'widget.printstorycards2',
+        helpId: 241,
+        componentCls: 'printcards',
+        scopeType: 'release',
+        autoScroll: true,
+
+        launch: function() {
+            this.add({
+                xtype: 'rallyprojectpicker',
+                itemId: 'projects',
+                value: this.getContext().getProject(),
+                listeners:{
+                    change: this._onProjectSelected,
+                    scope: this
+                }
+            });
+            this.add({
+                xtype: 'container',
+                itemId: 'cards'
+            });
+            this.callParent(arguments);
+        },
+
+        _onProjectSelected: function() {
+	        
+    	    var newContext = Ext.create(Rally.app.Context, {
+        	    initialValues: {
+            	    project: this._getProjectFilter()
+            	}
+        	});
+
+        	oldTimeboxScope = this.getContext().getTimeboxScope();
+        
+        	this.setContext(newContext);
+        	this.onScopeChange(oldTimeboxScope);
+        },
+
+        _getProjectFilter: function() {
+        	return this.down('#projects').getValue();
+   		},
+
+        onScopeChange: function(scope) {
+            this.down('#cards').getEl().setHTML('');
+            this._loadFeatures(scope);
+        },
+
+        _loadFeatures: function(scope) {
+            Ext.create('Rally.data.wsapi.Store', {
+                context: this.getContext().getDataContext(),
+                autoLoad: true,
+                model: Ext.identityFn('portfolioitem/feature'),
+                fetch: ['FormattedID', 'Name', 'Owner', 'Description', 'Parent'],
+                limit: (scope && scope.getRecord()) ? 200 : 50,
+                listeners: {
+                    load: this._onLoaded,
+                    scope: this
+                },
+                filters: [
+                    scope.getQueryFilter()
+                ]
+            });
+            context = this.getContext().getDataContext();
+            console.log('loadstories');
+        },
+
+        _onLoaded: function(store, records) {
+            var printCardHtml = '';
+            _.each(records, function(record, idx) {
+                printCardHtml += '<h1>' + record.data.Name + ' ('+ record.data.FormattedID + ')</h1>';
+               	printCardHtml += ' ' + record.data.Description;
+                printCardHtml += '<br/><br/><div class="pb" style="page-break-after:always"></div>';
+            }, this);
+            Ext.DomHelper.insertHtml('beforeEnd', this.down('#cards').getEl().dom, printCardHtml);
+
+            if(Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
+        },
+
+        getOptions: function() {
+            return [];
+        }
+    });   
+	Rally.launchApp('PrintIt', {
+        name: 'My Custom App'
+    });
+
+</script>
+
+</head>
+<body class="myApp" style="overflow: visible;">
+
+Hello world
+
+</body>
+</html>
