@@ -4,11 +4,12 @@ A small standalone web app that can print Agile Central Features from different 
 
 # Use
 
-Install node.js, get sources. 
+1) Install node.js
+2) download sources from GIT 
+3) run "npm install"
+4) run "node app.js"
 
-Run with "node app.js"
-
-The printing is running on "localhost:8080", so use your browser to access it.
+The printing "site" is running on "localhost:8080", so use your browser to access it.
 
 # Agile Central session
 
