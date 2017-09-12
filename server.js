@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.set('port', (process.env.PORT || 80))
+app.set('port', (process.env.PORT || 8080))
 
 
 // catch 404 and forward to error handler
