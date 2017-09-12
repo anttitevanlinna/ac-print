@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Agile Central prettier print</title>
+	<title>Agile Central epic printing</title>
 	<script type="text/javascript" src="https://eu1.rallydev.com/apps/2.0/sdk-debug.js"></script>
     <script type="text/javascript">
 
 Ext.define('PrintIt', {
-    extend: 'Rally.app.TimeboxScopedApp',
-    alias: 'widget.printstorycards2',
+    extend: 'Rally.app.App',
+    alias: 'widget.printepics',
     helpId: 241,
-    componentCls: 'printcards',
-    scopeType: 'release',
+    componentCls: 'printepics',
     autoScroll: true,
 
     launch: function() {
@@ -23,6 +22,11 @@ Ext.define('PrintIt', {
         });
 
         this.add({
+            xtype: 'panel',
+            html: 'Agile Central printing. Note that this app does not store any data. It just presents what you browse in Agile Central. An active session in Agile Central is needed, so log in there first.'
+        });
+
+        this.add({
             xtype: 'rallyprojectpicker',
             itemId: 'projects',
             value: this.getContext().getProject(),
@@ -31,12 +35,24 @@ Ext.define('PrintIt', {
                 scope: this
             }
         });
-
+        
+        this.add({
+            xtype: 'rallyportfolioitemtypecombobox',
+            itemId: 'types',
+            listeners:{
+                change: this._onTypeSelected,
+                scope: this
+            }                
+        }),
+        
         this.add({
             xtype: 'container',
             itemId: 'cards'
         });
+        
         this.callParent(arguments);
+
+
     },
 
     _onTypeSelected: function() {
@@ -77,11 +93,12 @@ Ext.define('PrintIt', {
     },
 
     _loadFeatures: function(scope) {
-//        typeToLoad = this._getTypeFilter();
+        typeToLoad = this._getTypeFilter();
+        console.log('_loadFeatures '+typeToLoad);
         Ext.create('Rally.data.wsapi.Store', {
             context: this.getContext().getDataContext(),
             autoLoad: true,
-            model: Ext.identityFn('portfolioitem/feature'),
+            model: Ext.identityFn(typeToLoad),
             fetch: ['FormattedID', 'Name', 'Owner', 'Description', 'Parent'],
             limit: (scope && scope.getRecord()) ? 200 : 50,
             listeners: {
@@ -89,14 +106,14 @@ Ext.define('PrintIt', {
                 scope: this
             },
             filters: [
-                scope ? scope.getQueryFilter(): null
+//                scope ? scope.getQueryFilter(): null
             ]
         });
         context = this.getContext().getDataContext();
     },
 
     _onLoaded: function(store, records) {
-        var printCardHtml = '';
+        var printCardHtml = '<div class="pb" style="page-break-after:always"></div>';
         _.each(records, function(record, idx) {
             printCardHtml += '<h1>' + record.data.Name + ' ('+ record.data.FormattedID + ')</h1>';
            	printCardHtml += ' ' + record.data.Description;
@@ -114,7 +131,7 @@ Ext.define('PrintIt', {
     }
 });   
 Rally.launchApp('PrintIt', {
-    name: 'My Custom App'
+    name: 'My Custom App 2'
 });
 </script>
 
